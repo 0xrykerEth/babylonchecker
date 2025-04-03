@@ -22,7 +22,65 @@ router.post('/checker', async (req, res) => {
             }
         }
 
-        res.json(results);
+        let tableHTML = `
+        <html>
+        <head>
+            <title>Babylon Airdrop Results</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    background-color: #f4f4f4;
+                }
+                .container {
+                    width: 50%;
+                    background: white;
+                    padding: 20px;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                }
+                h2 {
+                    text-align: center;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                }
+                th, td {
+                    padding: 10px;
+                    border: 1px solid #ddd;
+                    text-align: center;
+                }
+                th {
+                    background-color: #007bff;
+                    color: white;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>Babylon Airdrop Results</h2>
+                <table>
+                    <tr>
+                        <th>Address</th>
+                        <th>Total</th>
+                    </tr>
+                    ${results.map(row => `
+                    <tr>
+                        <td>${row.address}</td>
+                        <td>${row.total}</td>
+                    </tr>`).join('')}
+                </table>
+            </div>
+        </body>
+        </html>
+    `;
+
+    res.send(tableHTML);
 
     } catch (err) {
         console.error(err);
