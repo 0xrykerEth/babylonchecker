@@ -16,7 +16,7 @@ router.post('/checker', async (req, res) => {
 
         for (let address of addressList) {
             if (address) {
-                const response = await fetch(`https://airdrop-api.babylon.foundation/checker/data?babyAddress=${address}`);
+                const response = await fetch(`https://claim.hyperlane.foundation/api/check-eligibility?address=${address}`);
                 const data = await response.json();
                 results.push({ address, total: data.total });
             }
