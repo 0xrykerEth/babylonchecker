@@ -9,7 +9,6 @@ router.get('/checker', (req, res) => {
 router.post('/checker', async (req, res) => {
     try {
         let addresses = req.body.addresses || '';
-        
         let results = [];
 
         let addressList = addresses.split(',').map(addr => addr.trim());
@@ -18,14 +17,16 @@ router.post('/checker', async (req, res) => {
             if (address) {
                 const response = await fetch(`https://claim.hyperlane.foundation/api/check-eligibility?address=${address}`);
                 const data = await response.json();
-                results.push({ address, total: data.total });
+
+                let amount = data.response?.eligibilities?.[0]?.amount || "0"; // Extract token amount
+                results.push({ address, amount });
             }
         }
 
         let tableHTML = `
         <html>
         <head>
-            <title>Babylon Airdrop Results</title>
+            <title>Hyperlane Airdrop Results</title>
             <style>
                 body {
                     font-family: Arial, sans-serif;
@@ -63,16 +64,16 @@ router.post('/checker', async (req, res) => {
         </head>
         <body>
             <div class="container">
-                <h2>Babylon Airdrop Results</h2>
+                <h2>Hyperlane Airdrop Results</h2>
                 <table>
                     <tr>
                         <th>Address</th>
-                        <th>Total</th>
+                        <th>Tokens</th>
                     </tr>
                     ${results.map(row => `
                     <tr>
                         <td>${row.address}</td>
-                        <td>${row.total}</td>
+                        <td>${row.amount}</td>
                     </tr>`).join('')}
                 </table>
             </div>
@@ -87,5 +88,6 @@ router.post('/checker', async (req, res) => {
         res.status(500).send("An error occurred.");
     }
 });
+
 
 module.exports = router;
