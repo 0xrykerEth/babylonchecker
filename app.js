@@ -8,6 +8,9 @@ const checker = require('./checker')
 
 app.use(checker);
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 const server = http.createServer(app);
 
