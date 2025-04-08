@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const fetch = require('node-fetch'); // Make sure to install this if you're using Node < 18
 const router = express.Router();
 
 router.get('/checker', (req, res) => {
