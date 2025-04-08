@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fetch = require('node-fetch'); // Make sure to install this if you're using Node < 18
 const router = express.Router();
 
 router.get('/checker', (req, res) => {
@@ -14,12 +15,32 @@ router.post('/checker', async (req, res) => {
         let addressList = addresses.split(',').map(addr => addr.trim());
 
         for (let address of addressList) {
-            if (address) {
-                const response = await fetch(`https://claim.hyperlane.foundation/api/check-eligibility?address=${address}`);
-                const data = await response.json();
+            if (!address) continue;
 
-                let amount = data.response?.eligibilities?.[0]?.amount || "0"; // Extract token amount
+            try {
+                const response = await fetch(`https://claim.hyperlane.foundation/api/check-eligibility?address=${address}`);
+
+                if (!response.ok) {
+                    console.error(`Failed to fetch for ${address}: HTTP ${response.status}`);
+                    results.push({ address, amount: 'Error fetching' });
+                    continue;
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text(); // optional: to log unexpected HTML
+                    console.error(`Unexpected content type for ${address}: ${contentType}`);
+                    console.error(`Response text: ${text.slice(0, 200)}...`);
+                    results.push({ address, amount: 'Invalid content' });
+                    continue;
+                }
+
+                const data = await response.json();
+                let amount = data.response?.eligibilities?.[0]?.amount || "0";
                 results.push({ address, amount });
+            } catch (err) {
+                console.error(`Error fetching or parsing for ${address}:`, err.message);
+                results.push({ address, amount: 'Error occurred' });
             }
         }
 
@@ -79,15 +100,14 @@ router.post('/checker', async (req, res) => {
             </div>
         </body>
         </html>
-    `;
+        `;
 
-    res.send(tableHTML);
+        res.send(tableHTML);
 
     } catch (err) {
         console.error(err);
         res.status(500).send("An error occurred.");
     }
 });
-
 
 module.exports = router;
